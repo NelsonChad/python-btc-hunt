@@ -1,5 +1,5 @@
 import random
-from ecdsa import SECP256k1, VerifyingKey, SigningKey
+from ecdsa import SECP256k1, SigningKey
 
 # Chave pública fornecida
 public_key_hex = '03633cbe3ec02b9401c5effa144c5b4d22f87940259634858fc7e59b1c09937852'
@@ -22,15 +22,24 @@ def brute_force_private_key_random(public_key_hex, min_value_hex, max_value_hex)
         attempt_vk_hex = attempt_vk.to_string('compressed').hex()
         
         if attempt_vk_hex == public_key_hex:
-            return attempt_sk.to_string().hex()
+            return attempt_sk.to_string().hex(), public_key_hex
 
 # Definir o intervalo de chaves de 2^129 a 2^130 - 1 em hexadecimal
 min_value_hex = '0x200000000000000000000000000000000'
 max_value_hex = '0x3ffffffffffffffffffffffffffffffff'
 
+# Mostrar a chave pública e o intervalo
+print(f"Chave Pública: {public_key_hex}")
+print(f"Intervalo de Chaves: {min_value_hex} a {max_value_hex}")
+print("Procurando...")
+
 try:
-    found_private_key = brute_force_private_key_random(public_key_hex, min_value_hex, max_value_hex)
+    found_private_key, found_public_key = brute_force_private_key_random(public_key_hex, min_value_hex, max_value_hex)
     if found_private_key:
         print(f"Chave Privada Encontrada: {found_private_key}")
+        # Salvar as chaves em um arquivo de texto
+        with open("chaves_encontradas.txt", "w") as file:
+            file.write(f"Chave Pública: {found_public_key}\n")
+            file.write(f"Chave Privada: {found_private_key}\n")
 except KeyboardInterrupt:
     print("Busca interrompida pelo usuário.")
