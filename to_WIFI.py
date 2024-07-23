@@ -24,6 +24,6 @@ def private_key_to_wif(private_key_hex, compressed=False):
     return wif.decode()
 
 # Exemplo de chave privada
-private_key_hex = '000000000000000000000000000000000000000000000001a838b13505b26867'
+private_key_hex = '000000000000000000000000000000000000000af55fc59c335c8ec67ed24826'
 wif_key = private_key_to_wif(private_key_hex, compressed=True)
 print(f'Chave Privada WIF: {wif_key}')

@@ -14,7 +14,7 @@ def generate_private_key_in_range(start_range, end_range):
         str: The generated private key in hexadecimal format.
     """
     # Generate a random integer in the specified range [start_range, end_range]
-    private_key_int = random.randint(start_range, end_range)
+    private_key_int = random.randint(start_range + 6805647338418769269267492148635364, end_range)
 
     # Convert the integer to hexadecimal format
     private_key_hex = hex(private_key_int)[2:].zfill(64)  # 64 characters (32 bytes)
@@ -95,7 +95,7 @@ def main():
     """Main function."""
     try:
         public_key_hex = "03633cbe3ec02b9401c5effa144c5b4d22f87940259634858fc7e59b1c09937852"
-        start_range = 2**129  # 0x200000000000000000000000000000000
+        start_range = 2**129 # 0x200000000000000000000000000000000
         end_range = 2**130 - 1  # 0x3ffffffffffffffffffffffffffffffff
 
         print(f"Searching for private key corresponding to public key: {public_key_hex}")
