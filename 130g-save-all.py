@@ -76,7 +76,7 @@ def find_private_key(public_key_hex, start_range, end_range):
 
     # Attempt to find the private key within the specified range
     while True:
-        private_key_hex = generate_private_key_in_range(start_range + random.randint(1, 680564733841876926926749214), end_range - random.randint(1, 68056473384187692692674921486))
+        private_key_hex = generate_private_key_in_range(start_range + random.randint(1, 68056473384187692692674921486), end_range - random.randint(1, 68056473384187692692674921486))
 
         # Skip if private key has already been used
         if private_key_hex in used_private_keys:
