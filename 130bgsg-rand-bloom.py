@@ -2,25 +2,28 @@ import random
 from ecdsa import SECP256k1, VerifyingKey
 from math import isqrt
 from concurrent.futures import ProcessPoolExecutor
+from pybloom_live import BloomFilter
 
 def point_to_hex(point):
+    # Função para converter um ponto da curva elíptica para hexadecimal
     return point.x().to_bytes(32, byteorder='big').hex() + point.y().to_bytes(32, byteorder='big').hex()
 
-def compute_baby_steps(subrange, G, num_steps):
+def compute_baby_steps(subrange, G, num_steps, bloom_filter):
     baby_steps = {}
-    tested_private_keys = set()
     for _ in range(num_steps):
         k = random.randint(*subrange)
-        if k in tested_private_keys:
+        if k in bloom_filter:
             continue
         point = k * G
         point_hex = point_to_hex(point)
         baby_steps[point_hex] = k
-        tested_private_keys.add(k)
+        bloom_filter.add(k)
     return baby_steps
 
-def baby_step_giant_step_random(public_key_hex, min_value, max_value, curve=SECP256k1, num_random_baby_steps=1000000, num_workers=4):
+def baby_step_giant_step_random(public_key_hex, min_value, max_value, curve=SECP256k1, num_random_baby_steps=100000000, num_workers=4):
     print(f"Testing {num_random_baby_steps} Baby Steps...")
+    
+    # Converte a chave pública de hexadecimal para bytes e então para um ponto da curva elíptica
     public_key_bytes = bytes.fromhex(public_key_hex)
     public_key_point = VerifyingKey.from_string(public_key_bytes, curve=curve).pubkey.point
 
@@ -30,16 +33,22 @@ def baby_step_giant_step_random(public_key_hex, min_value, max_value, curve=SECP
     range_size = max_value - min_value + 1
     m = isqrt(range_size) + 1
 
-    # Divide the range into subranges for parallel processing
+    # Divide o intervalo em subintervalos para processamento paralelo
     step_size = (range_size // num_workers)
     subranges = [(min_value + i * step_size, min_value + (i + 1) * step_size - 1) for i in range(num_workers)]
-    subranges[-1] = (subranges[-1][0], max_value)  # Ensure the last subrange ends at max_value
+    subranges[-1] = (subranges[-1][0], max_value)  # Garante que o último subrange termine em max_value
 
-    # Use ProcessPoolExecutor to compute baby steps in parallel
+    # Inicializa um filtro bloom com a capacidade e taxa de erro especificadas
+    bloom_filter = BloomFilter(capacity=num_random_baby_steps, error_rate=0.001)
+
+    # Usa ProcessPoolExecutor para calcular baby steps em paralelo
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
-        future_to_baby_steps = {executor.submit(compute_baby_steps, subrange, G, num_random_baby_steps // num_workers): subrange for subrange in subranges}
+        future_to_baby_steps = {
+            executor.submit(compute_baby_steps, subrange, G, num_random_baby_steps // num_workers, bloom_filter): subrange
+            for subrange in subranges
+        }
 
-    # Collect and merge results from all futures
+    # Coleta e mescla os resultados de todos os futures
     baby_steps = {}
     for future in future_to_baby_steps:
         result = future.result()
@@ -48,6 +57,7 @@ def baby_step_giant_step_random(public_key_hex, min_value, max_value, curve=SECP
     giant_step = m * G
     current_point = public_key_point
     print(f"Testing {m} Giant Steps...")
+    
     for i in range(m):
         current_point_hex = point_to_hex(current_point)
         if current_point_hex in baby_steps:

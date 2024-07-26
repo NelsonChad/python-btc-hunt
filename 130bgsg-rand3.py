@@ -19,7 +19,7 @@ def compute_baby_steps(subrange, G, num_steps):
         tested_private_keys.add(k)
     return baby_steps
 
-def baby_step_giant_step_random(public_key_hex, min_value, max_value, curve=SECP256k1, num_random_baby_steps=1000000, num_workers=4):
+def baby_step_giant_step_random(public_key_hex, min_value, max_value, curve=SECP256k1, num_random_baby_steps=100000, num_workers=4):
     print(f"Testing {num_random_baby_steps} Baby Steps...")
     public_key_bytes = bytes.fromhex(public_key_hex)
     public_key_point = VerifyingKey.from_string(public_key_bytes, curve=curve).pubkey.point
@@ -59,9 +59,10 @@ def baby_step_giant_step_random(public_key_hex, min_value, max_value, curve=SECP
     return None, None
 
 if __name__ == '__main__':
-    public_key_hex = '03633cbe3ec02b9401c5effa144c5b4d22f87940259634858fc7e59b1c09937852'
-    min_value_hex = '0x200000000000000000000000000000000'
-    max_value_hex = '0x3ffffffffffffffffffffffffffffffff'
+
+    public_key_hex = '0230210c23b1a047bc9bdbb13448e67deddc108946de6de639bcc75d47c0216b1b'
+    min_value_hex = '0x10000000000000000'
+    max_value_hex = '0x1ffffffffffffffff'
     min_value = int(min_value_hex, 16)
     max_value = int(max_value_hex, 16)
 
