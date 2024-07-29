@@ -2,7 +2,7 @@ import random
 from ecdsa import SECP256k1, VerifyingKey
 from math import isqrt
 
-def baby_step_giant_step_random(public_key_hex, min_value, max_value, curve=SECP256k1, num_random_baby_steps=1000):
+def baby_step_giant_step_random(public_key_hex, min_value, max_value, curve=SECP256k1, num_random_baby_steps=100000):
     # Converte a chave pública de hexadecimal para o objeto de chave de verificação
     public_key_bytes = bytes.fromhex(public_key_hex)
     public_key_point = VerifyingKey.from_string(public_key_bytes, curve=curve).pubkey.point
